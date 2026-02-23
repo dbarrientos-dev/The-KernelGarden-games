@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackJack 🃏 — Vonsai Games</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0a0f1e;
+      color: #e0eaf8;
+      font-family: 'Exo 2', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    nav {
+      width: 100%;
+      background-color: #0d1423;
+      border-bottom: 2px solid #00ff88;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: #00ff88;
+    }
+
+    nav a {
+      color: #7a90b0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+
+    nav a:hover { color: #00ff88; }
+
+    /* TÍTULO */
+    .titulo {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+
+    .titulo h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      color: #ffe600;
+      margin: 0 0 6px;
+    }
+
+    .titulo p {
+      color: #7a90b0;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .mesa {
+      width: 100%;
+      max-width: 700px;
+      padding: 0 20px 40px;
+      box-sizing: border-box;
+    }
+
+    /* FICHA DE SALDO */
+    .saldo-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #111827;
+      border: 1px solid #1e2a40;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+    }
+
+    .saldo-item {
+      text-align: center;
+    }
+
+    .saldo-label {
+      color: #7a90b0;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .saldo-valor {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .saldo-valor.amarillo { color: #ffe600; }
+    .saldo-valor.verde    { color: #00ff88; }
+    .saldo-valor.rojo     { color: #ff4466; }
+
+
+    /* ZONA DEALER */
+    .zona {
+      background-color: #0d1e12;
+      border: 1px solid #1e3a25;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .zona-titulo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      color: #7a90b0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .puntaje-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background-color: #1e2a40;
+      color: #e0eaf8;
+    }
+
+    .puntaje-badge.bust { background-color: #ff446630; color: #ff4466; }
+    .puntaje-badge.bj   { background-color: #ffe60030; color: #ffe600; }
+
+
+    /* CARTAS */
+    .mano {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 120px;
+    }
+
+    .carta {
+      width: 72px;
+      height: 100px;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 6px 8px;
+      box-sizing: border-box;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Exo 2', sans-serif;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      animation: aparecer 0.2s ease;
+    }
+
+    @keyframes aparecer {
+      from { transform: scale(0.7) translateY(-10px); opacity: 0; }
+      to   { transform: scale(1) translateY(0);        opacity: 1; }
+    }
+
+    .carta.roja  { color: #cc0000; }
+    .carta.negra { color: #111;    }
+
+    .carta-palo-abajo {
+      text-align: right;
+      font-size: 1rem;
+    }
+
+    /* Carta boca abajo */
+    .carta.oculta {
+      background: linear-gradient(135deg, #1a237e 25%, #283593 25%, #283593 50%, #1a237e 50%, #1a237e 75%, #283593 75%);
+      background-size: 16px 16px;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.8rem;
+    }
+
+
+    /* ZONA JUGADOR */
+    .zona.jugador {
+      background-color: #0d1a2e;
+      border-color: #1e2a40;
+    }
+
+
+    /* MENSAJE DE RESULTADO */
+    .mensaje-resultado {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .mensaje-resultado.gana   { background-color: #00ff8820; color: #00ff88; border: 1px solid #00ff8840; }
+    .mensaje-resultado.pierde { background-color: #ff446620; color: #ff4466; border: 1px solid #ff446640; }
+    .mensaje-resultado.empate { background-color: #ffe60020; color: #ffe600; border: 1px solid #ffe60040; }
+
+
+    /* CONTROLES DE APUESTA */
+    .apuesta-panel {
+      background-color: #111827;
+      border: 1px solid #1e2a40;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .apuesta-panel p {
+      color: #7a90b0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 12px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .fichas {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .ficha {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px dashed;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      background-color: transparent;
+    }
+
+    .ficha:hover { transform: scale(1.1); }
+
+    .ficha.f5   { color: #00ff88; border-color: #00ff88; }
+    .ficha.f10  { color: #00cfff; border-color: #00cfff; }
+    .ficha.f25  { color: #ffe600; border-color: #ffe600; }
+    .ficha.f50  { color: #c77dff; border-color: #c77dff; }
+    .ficha.f100 { color: #ff4466; border-color: #ff4466; }
+
+    .ficha:disabled {
+      opacity: 0.3;
+      cursor: default;
+      transform: none;
+    }
+
+    .apuesta-actual {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      color: #ffe600;
+    }
+
+
+    /* BOTONES DE ACCIÓN */
+    .acciones {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 13px 26px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .btn:disabled { opacity: 0.3; cursor: default; }
+
+    .btn-verde  { background-color: #00ff88; color: #000; }
+    .btn-verde:not(:disabled):hover  { background-color: #00ffaa; }
+
+    .btn-rojo   { background-color: #ff4466; color: #fff; }
+    .btn-rojo:not(:disabled):hover   { background-color: #ff6680; }
+
+    .btn-azul   { background-color: #00cfff; color: #000; }
+    .btn-azul:not(:disabled):hover   { background-color: #33d6ff; }
+
+    .btn-borde  { background-color: transparent; color: #7a90b0; border: 2px solid #1e2a40; }
+    .btn-borde:not(:disabled):hover  { border-color: #7a90b0; color: #e0eaf8; }
+
+
+    /* HISTORIAL */
+    .historial {
+      margin-top: 14px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .resultado-mini {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .resultado-mini.g { background-color: #00ff8820; color: #00ff88; }
+    .resultado-mini.p { background-color: #ff446620; color: #ff4466; }
+    .resultado-mini.e { background-color: #ffe60020; color: #ffe600; }
+
+
+    footer {
+      background-color: #0d1423;
+      border-top: 1px solid #1e2a40;
+      padding: 16px;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+
+    footer p { color: #7a90b0; font-size: 0.78rem; margin: 0; }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="logo">🎮 VonsaiGames</div>
+    <a href="index.html">← Volver al inicio</a>
+  </nav>
+
+  <!-- TÍTULO -->
+  <div class="titulo">
+    <h1>🃏 BlackJack</h1>
+    <p>Llega a 21 sin pasarte. Más cerca gana.</p>
+  </div>
+
+  <!-- MESA -->
+  <div class="mesa">
+
+    <!-- SALDO -->
+    <div class="saldo-bar">
+      <div class="saldo-item">
+        <span class="saldo-label">Saldo</span>
+        <span class="saldo-valor amarillo" id="saldo">$1000</span>
+      </div>
+      <div class="saldo-item">
+        <span class="saldo-label">Apuesta</span>
+        <span class="saldo-valor verde" id="apuesta-display">$0</span>
+      </div>
+      <div class="saldo-item">
+        <span class="saldo-label">Ganadas</span>
+        <span class="saldo-valor verde" id="ganadas">0</span>
+      </div>
+      <div class="saldo-item">
+        <span class="saldo-label">Perdidas</span>
+        <span class="saldo-valor rojo" id="perdidas">0</span>
+      </div>
+    </div>
+
+    <!-- DEALER -->
+    <div class="zona" id="zona-dealer">
+      <div class="zona-titulo">
+        <span>🤖 Dealer</span>
+        <span class="puntaje-badge" id="puntaje-dealer">?</span>
+      </div>
+      <div class="mano" id="mano-dealer"></div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="mensaje-resultado" id="mensaje-resultado"></div>
+
+    <!-- JUGADOR -->
+    <div class="zona jugador">
+      <div class="zona-titulo">
+        <span>👤 Tú</span>
+        <span class="puntaje-badge" id="puntaje-jugador">0</span>
+      </div>
+      <div class="mano" id="mano-jugador"></div>
+    </div>
+
+    <!-- APUESTA -->
+    <div class="apuesta-panel" id="panel-apuesta">
+      <p>Elige tu apuesta</p>
+      <div class="fichas">
+        <button class="ficha f5"   onclick="apostar(5)"  >$5</button>
+        <button class="ficha f10"  onclick="apostar(10)" >$10</button>
+        <button class="ficha f25"  onclick="apostar(25)" >$25</button>
+        <button class="ficha f50"  onclick="apostar(50)" >$50</button>
+        <button class="ficha f100" onclick="apostar(100)">$100</button>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="apuesta-actual">Apuesta actual: <span id="apuesta-actual">$0</span></span>
+        <button class="btn btn-borde" style="flex:none; padding:8px 16px; font-size:0.7rem;" onclick="limpiarApuesta()">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="acciones">
+      <button class="btn btn-verde" id="btn-deal"   onclick="repartir()">Repartir</button>
+      <button class="btn btn-azul"  id="btn-hit"    onclick="pedir()"   disabled>Pedir carta</button>
+      <button class="btn btn-rojo"  id="btn-stand"  onclick="plantarse()" disabled>Plantarse</button>
+      <button class="btn btn-borde" id="btn-doble"  onclick="doblarApuesta()" disabled>Doblar</button>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="historial" id="historial"></div>
+
+  </div>
+
+  <footer>
+    <p>Vonsai Games · The KernelGarden Team · CUE AVH, Armenia 🇨🇴</p>
+  </footer>
+
+
+<script>
+
+  // ============================================================
+  //  PALOS Y VALORES
+  // ============================================================
+  const PALOS   = ["♠", "♥", "♦", "♣"];
+  const VALORES = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+  // ============================================================
+  //  VARIABLES DEL JUEGO
+  // ============================================================
+  let baraja         = [];
+  let manoJugador    = [];
+  let manoDealer     = [];
+  let saldo          = 1000;
+  let apuesta        = 0;
+  let enJuego        = false;  // true cuando se repartió y el jugador aún no terminó
+  let contGanadas    = 0;
+  let contPerdidas   = 0;
+  let historial      = [];     // array con resultados: "g", "p" o "e"
+
+
+  // ============================================================
+  //  CREAR Y BARAJAR LA BARAJA
+  // ============================================================
+  function crearBaraja() {
+
+    baraja = [];
+
+    // Doble for: recorremos palos y valores para generar las 52 cartas
+    for (let p = 0; p < PALOS.length; p++) {
+      for (let v = 0; v < VALORES.length; v++) {
+        baraja.push({ palo: PALOS[p], valor: VALORES[v] });
+      }
+    }
+
+    barajarFisherYates();
+  }
+
+  // Algoritmo de barajado (Fisher-Yates)
+  function barajarFisherYates() {
+
+    for (let i = baraja.length - 1; i > 0; i--) {
+
+      // Elegir un índice aleatorio entre 0 e i
+      const j = Math.floor(Math.random() * (i + 1));
+
+      // Intercambiar las cartas usando una variable temporal
+      const temp = baraja[i];
+      baraja[i]  = baraja[j];
+      baraja[j]  = temp;
+    }
+  }
+
+
+  // ============================================================
+  //  SACAR UNA CARTA DE LA BARAJA
+  // ============================================================
+  function sacarCarta() {
+    // Si se acabaron las cartas, creamos una nueva baraja
+    if (baraja.length === 0) {
+      crearBaraja();
+    }
+    return baraja.pop();
+  }
+
+
+  // ============================================================
+  //  CALCULAR EL PUNTAJE DE UNA MANO
+  //  El As puede valer 11 o 1 (lo que más convenga)
+  // ============================================================
+  function calcularPuntaje(mano) {
+
+    let total = 0;
+    let ases  = 0;
+
+    for (let i = 0; i < mano.length; i++) {
+
+      const carta = mano[i];
+
+      // Operador ternario y operadores de comparación
+      if (carta.valor === "A") {
+        total += 11;
+        ases++;
+      } else if (carta.valor === "J" || carta.valor === "Q" || carta.valor === "K") {
+        total += 10;
+      } else {
+        total += parseInt(carta.valor);
+      }
+    }
+
+    // Si nos pasamos de 21 y tenemos ases, los bajamos de 11 a 1
+    while (total > 21 && ases > 0) {
+      total -= 10;
+      ases--;
+    }
+
+    return total;
+  }
+
+
+  // ============================================================
+  //  APOSTAR: sumar ficha a la apuesta actual
+  // ============================================================
+  function apostar(cantidad) {
+
+    // No se puede apostar más de lo que se tiene
+    if (cantidad > saldo) return;
+
+    // No se puede apostar más que el saldo total disponible
+    if (apuesta + cantidad > saldo) {
+      apuesta = saldo;
+    } else {
+      apuesta += cantidad;
+    }
+
+    actualizarUI();
+  }
+
+  function limpiarApuesta() {
+    apuesta = 0;
+    actualizarUI();
+  }
+
+
+  // ============================================================
+  //  REPARTIR: iniciar una ronda nueva
+  // ============================================================
+  function repartir() {
+
+    // Validar que haya apuesta
+    if (apuesta <= 0) {
+      alert("¡Elige una apuesta primero!");
+      return;
+    }
+
+    // Validar saldo suficiente
+    if (apuesta > saldo) {
+      alert("No tienes suficiente saldo.");
+      return;
+    }
+
+    // Descontar la apuesta del saldo
+    saldo -= apuesta;
+
+    // Reiniciar manos
+    manoJugador = [];
+    manoDealer  = [];
+    enJuego     = true;
+
+    // Ocultar mensaje anterior
+    const msgDiv = document.getElementById("mensaje-resultado");
+    msgDiv.style.display = "none";
+
+    // Si la baraja tiene pocas cartas, crear una nueva
+    if (baraja.length < 15) {
+      crearBaraja();
+    }
+
+    // Repartir 2 cartas a cada uno
+    manoJugador.push(sacarCarta());
+    manoDealer.push(sacarCarta());
+    manoJugador.push(sacarCarta());
+    manoDealer.push(sacarCarta());
+
+    // Activar/desactivar botones
+    document.getElementById("btn-deal").disabled  = true;
+    document.getElementById("btn-hit").disabled   = false;
+    document.getElementById("btn-stand").disabled = false;
+    document.getElementById("btn-doble").disabled = false;
+
+    // Desactivar fichas de apuesta durante la ronda
+    desactivarFichas(true);
+
+    actualizarUI();
+
+    // Verificar si el jugador tiene BlackJack inmediato (21 con 2 cartas)
+    const puntajeInicial = calcularPuntaje(manoJugador);
+
+    if (puntajeInicial === 21) {
+      plantarse(); // BlackJack automático
+    }
+  }
+
+
+  // ============================================================
+  //  PEDIR CARTA (HIT)
+  // ============================================================
+  function pedir() {
+
+    if (!enJuego) return;
+
+    manoJugador.push(sacarCarta());
+
+    const puntaje = calcularPuntaje(manoJugador);
+
+    // Deshabilitar "doblar" después de la primera carta extra
+    document.getElementById("btn-doble").disabled = true;
+
+    actualizarUI();
+
+    // Si el jugador se pasa de 21, pierde automáticamente
+    if (puntaje > 21) {
+      terminarRonda("pierde", "💥 ¡Te pasaste! Bust — Perdiste $" + apuesta);
+    }
+  }
+
+
+  // ============================================================
+  //  PLANTARSE (STAND): turno del dealer
+  // ============================================================
+  function plantarse() {
+
+    if (!enJuego) return;
+
+    enJuego = false;
+
+    // El dealer saca cartas hasta llegar a 17 o más
+    while (calcularPuntaje(manoDealer) < 17) {
+      manoDealer.push(sacarCarta());
+    }
+
+    const pDealer  = calcularPuntaje(manoDealer);
+    const pJugador = calcularPuntaje(manoJugador);
+
+    // Desactivar botones
+    document.getElementById("btn-hit").disabled   = true;
+    document.getElementById("btn-stand").disabled = true;
+    document.getElementById("btn-doble").disabled = true;
+
+    actualizarUI(true); // mostrar carta oculta del dealer
+
+    // Determinar el resultado con if / else if / else
+    if (pDealer > 21) {
+      // Dealer bust: jugador gana
+      terminarRonda("gana", "🎉 ¡Dealer bust! Ganaste $" + apuesta * 2);
+
+    } else if (pJugador > pDealer) {
+      // Jugador tiene más puntos
+      terminarRonda("gana", "🏆 ¡Ganaste! $" + apuesta * 2);
+
+    } else if (pDealer > pJugador) {
+      // Dealer gana
+      terminarRonda("pierde", "😔 Dealer gana. Perdiste $" + apuesta);
+
+    } else {
+      // Empate: devolver la apuesta
+      terminarRonda("empate", "🤝 Empate — Se devuelve tu apuesta");
+    }
+  }
+
+
+  // ============================================================
+  //  DOBLAR APUESTA (DOUBLE DOWN)
+  // ============================================================
+  function doblarApuesta() {
+
+    // Solo se puede doblar si hay saldo suficiente para la apuesta doble
+    if (apuesta > saldo) {
+      alert("No tienes saldo suficiente para doblar.");
+      return;
+    }
+
+    saldo   -= apuesta;  // descontar la apuesta adicional
+    apuesta *= 2;        // doblar con el operador *=
+
+    actualizarUI();
+
+    // Pedir exactamente una carta y luego plantarse
+    manoJugador.push(sacarCarta());
+
+    const puntaje = calcularPuntaje(manoJugador);
+    actualizarUI();
+
+    if (puntaje > 21) {
+      terminarRonda("pierde", "💥 ¡Te pasaste! Perdiste $" + apuesta);
+    } else {
+      plantarse();
+    }
+  }
+
+
+  // ============================================================
+  //  TERMINAR LA RONDA
+  // ============================================================
+  function terminarRonda(resultado, mensaje) {
+
+    enJuego = false;
+
+    // Ajustar saldo según resultado usando if / else if / else
+    if (resultado === "gana") {
+      saldo += apuesta * 2;  // devolver apuesta + ganar lo mismo
+      contGanadas++;
+      historial.push("g");
+
+    } else if (resultado === "empate") {
+      saldo += apuesta;      // devolver la apuesta sin ganar nada extra
+      historial.push("e");
+
+    } else {
+      // resultado === "pierde": el saldo ya se descontó al repartir
+      contPerdidas++;
+      historial.push("p");
+    }
+
+    // Mostrar mensaje de resultado
+    const msgDiv = document.getElementById("mensaje-resultado");
+    msgDiv.textContent  = mensaje;
+    msgDiv.className    = "mensaje-resultado " + resultado;
+    msgDiv.style.display = "block";
+
+    // Reiniciar apuesta para la próxima ronda
+    apuesta = 0;
+
+    // Activar el botón de repartir
+    document.getElementById("btn-deal").disabled  = false;
+    document.getElementById("btn-hit").disabled   = true;
+    document.getElementById("btn-stand").disabled = true;
+    document.getElementById("btn-doble").disabled = true;
+
+    desactivarFichas(false);
+    actualizarUI(true);
+
+    // Si el jugador se quedó sin saldo
+    if (saldo <= 0) {
+      setTimeout(function () {
+        alert("💸 ¡Sin saldo! Se reinicia con $1000");
+        saldo = 1000;
+        actualizarUI(true);
+      }, 800);
+    }
+  }
+
+
+  // ============================================================
+  //  ACTUALIZAR LA INTERFAZ
+  //  mostrarDealerCompleto: true cuando terminó la ronda
+  // ============================================================
+  function actualizarUI(mostrarDealerCompleto) {
+
+    // --- SALDO Y APUESTA ---
+    document.getElementById("saldo").textContent          = "$" + saldo;
+    document.getElementById("apuesta-display").textContent = "$" + apuesta;
+    document.getElementById("apuesta-actual").textContent  = "$" + apuesta;
+    document.getElementById("ganadas").textContent         = contGanadas;
+    document.getElementById("perdidas").textContent        = contPerdidas;
+
+    // --- MANO DEL JUGADOR ---
+    const divJugador = document.getElementById("mano-jugador");
+    divJugador.innerHTML = "";
+
+    for (let i = 0; i < manoJugador.length; i++) {
+      divJugador.appendChild( crearCartaHTML(manoJugador[i], false) );
+    }
+
+    // Puntaje del jugador
+    const pJ = calcularPuntaje(manoJugador);
+    const badgeJ = document.getElementById("puntaje-jugador");
+    badgeJ.textContent  = pJ;
+    badgeJ.className    = "puntaje-badge" + (pJ > 21 ? " bust" : "") + (pJ === 21 ? " bj" : "");
+
+    // --- MANO DEL DEALER ---
+    const divDealer = document.getElementById("mano-dealer");
+    divDealer.innerHTML = "";
+
+    for (let i = 0; i < manoDealer.length; i++) {
+
+      // La segunda carta del dealer va oculta mientras el juego sigue
+      const ocultar = !mostrarDealerCompleto && i === 1 && enJuego === false
+                      ? false
+                      : (!mostrarDealerCompleto && i === 1);
+
+      divDealer.appendChild( crearCartaHTML(manoDealer[i], ocultar) );
+    }
+
+    // Puntaje del dealer
+    const badgeD = document.getElementById("puntaje-dealer");
+    if (!mostrarDealerCompleto && manoDealer.length > 0) {
+      // Solo mostrar la primera carta
+      const soloUna = [manoDealer[0]];
+      const pDTemp  = calcularPuntaje(soloUna);
+      badgeD.textContent = pDTemp + " + ?";
+      badgeD.className   = "puntaje-badge";
+    } else {
+      const pD = calcularPuntaje(manoDealer);
+      badgeD.textContent = pD === 0 ? "?" : pD;
+      badgeD.className   = "puntaje-badge" + (pD > 21 ? " bust" : "") + (pD === 21 ? " bj" : "");
+    }
+
+    // --- HISTORIAL ---
+    const divHistorial = document.getElementById("historial");
+    divHistorial.innerHTML = "";
+
+    // Mostrar últimos 20 resultados
+    const ultimos = historial.slice(-20);
+
+    for (let i = 0; i < ultimos.length; i++) {
+
+      const span = document.createElement("span");
+      span.className = "resultado-mini " + ultimos[i];
+
+      if (ultimos[i] === "g") {
+        span.textContent = "✓ Ganó";
+      } else if (ultimos[i] === "p") {
+        span.textContent = "✗ Perdió";
+      } else {
+        span.textContent = "= Empate";
+      }
+
+      divHistorial.appendChild(span);
+    }
+  }
+
+
+  // ============================================================
+  //  CREAR EL HTML DE UNA CARTA
+  // ============================================================
+  function crearCartaHTML(carta, oculta) {
+
+    const div = document.createElement("div");
+
+    if (oculta) {
+      div.className = "carta oculta";
+      div.textContent = "🂠";
+      return div;
+    }
+
+    // Determinar si el palo es rojo o negro
+    const esRoja = carta.palo === "♥" || carta.palo === "♦";
+    div.className = "carta " + (esRoja ? "roja" : "negra");
+
+    // Esquina superior izquierda
+    const top = document.createElement("div");
+    top.textContent = carta.valor + carta.palo;
+
+    // Palo central
+    const centro = document.createElement("div");
+    centro.style.textAlign = "center";
+    centro.style.fontSize  = "1.6rem";
+    centro.textContent     = carta.palo;
+
+    // Esquina inferior derecha (invertida)
+    const bottom = document.createElement("div");
+    bottom.className   = "carta-palo-abajo";
+    bottom.textContent = carta.palo + carta.valor;
+
+    div.appendChild(top);
+    div.appendChild(centro);
+    div.appendChild(bottom);
+
+    return div;
+  }
+
+
+  // ============================================================
+  //  ACTIVAR / DESACTIVAR FICHAS DE APUESTA
+  // ============================================================
+  function desactivarFichas(deshabilitar) {
+
+    const fichas = document.querySelectorAll(".ficha");
+
+    fichas.forEach(function (ficha) {
+      ficha.disabled = deshabilitar;
+    });
+  }
+
+
+  // ============================================================
+  //  INICIO
+  // ============================================================
+  crearBaraja();
+  actualizarUI();
+
+</script>
+
+</body>
+</html>

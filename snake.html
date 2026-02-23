@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROBCO INDUSTRIES — SNAKE PROTOCOL</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet" />
+
+  <style>
+
+    /* =============================================
+       VARIABLES — PHOSPHOR GREEN CRT PALETTE
+    ============================================= */
+    :root {
+      --verde:       #39ff14;
+      --verde-dim:   #1a7a05;
+      --verde-dark:  #0a2e03;
+      --verde-mid:   #22bb08;
+      --negro:       #030f01;
+      --scanline:    rgba(0, 0, 0, 0.35);
+      --glow:        0 0 8px #39ff14, 0 0 20px #39ff1460;
+      --glow-soft:   0 0 4px #39ff1480;
+    }
+
+    /* =============================================
+       RESET & BODY
+    ============================================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+   html, body {
+      width: 100%;
+      min-height: 100vh;
+      
+      /* --- FONDO DE PANTALLA --- */
+      background-color: #000;
+      background-image: url('./assets/images/fondo.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed; /* Evita que el fondo se mueva al hacer scroll */
+      background-repeat: no-repeat;
+      /* ------------------------- */
+
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Cambiado a 'center' para que la terminal quede bien centrada verticalmente */
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* =============================================
+       EFECTO CRT GLOBAL: scanlines + viñeta
+    ============================================= */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--scanline) 0px,
+        var(--scanline) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center,
+        transparent 50%,
+        rgba(0,0,0,0.85) 100%
+      );
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* =============================================
+       PANTALLA TERMINAL
+    ============================================= */
+    .terminal {
+      width: 100%;
+      max-width: 780px;
+      padding: 20px 24px 40px;
+      color: var(--verde);
+    }
+
+    /* =============================================
+       CABECERA: barra de sistema tipo ROBCO
+    ============================================= */
+    .sys-bar {
+      border: 1px solid var(--verde-dim);
+      border-bottom: none;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      background-color: var(--verde-dark);
+      text-shadow: var(--glow-soft);
+    }
+
+    .sys-bar .blink {
+      animation: blink 1.2s step-end infinite;
+    }
+
+    /* =============================================
+       MARCO DEL MONITOR
+    ============================================= */
+    .monitor {
+      border: 2px solid var(--verde-dim);
+      background-color: var(--negro);
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 0 30px #39ff1430, inset 0 0 60px rgba(0,0,0,0.8);
+    }
+
+    /* Esquinas decorativas */
+    .monitor::before,
+    .monitor::after {
+      content: '+';
+      position: absolute;
+      color: var(--verde-dim);
+      font-size: 1rem;
+    }
+
+    .monitor::before { top: 6px;  left: 8px;  }
+    .monitor::after  { top: 6px;  right: 8px; }
+
+    /* =============================================
+       CABECERA DEL JUEGO
+    ============================================= */
+    .game-header {
+      text-align: center;
+      border-bottom: 1px solid var(--verde-dark);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .game-title {
+      font-family: 'VT323', monospace;
+      font-size: 2.2rem;
+      letter-spacing: 0.2em;
+      color: var(--verde);
+      text-shadow: var(--glow);
+      line-height: 1;
+    }
+
+    .game-subtitle {
+      font-size: 0.65rem;
+      color: var(--verde-mid);
+      letter-spacing: 0.25em;
+      margin-top: 4px;
+      text-shadow: var(--glow-soft);
+    }
+
+    /* =============================================
+       HUD: puntos, nivel, vidas
+    ============================================= */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: var(--verde-mid);
+    }
+
+    .hud-val {
+      color: var(--verde);
+      text-shadow: var(--glow-soft);
+    }
+
+    /* Barra de "radiación" que sube con el nivel */
+    .rad-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+    }
+
+    .rad-bar {
+      width: 120px;
+      height: 8px;
+      border: 1px solid var(--verde-dim);
+      background-color: var(--negro);
+    }
+
+    .rad-relleno {
+      height: 100%;
+      background-color: var(--verde);
+      box-shadow: var(--glow-soft);
+      transition: width 0.3s;
+      width: 0%;
+    }
+
+    /* =============================================
+       CANVAS
+    ============================================= */
+    #canvas {
+      display: block;
+      border: 1px solid var(--verde-dim);
+      image-rendering: pixelated;
+      width: 100%;
+      /* altura la maneja JS según el ancho */
+    }
+
+    /* =============================================
+       PANTALLA SUPERPUESTA (inicio / game over)
+    ============================================= */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(3, 15, 1, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .overlay.escondido { display: none; }
+
+    .overlay-titulo {
+      font-family: 'VT323', monospace;
+      font-size: 2.4rem;
+      letter-spacing: 0.2em;
+      color: var(--verde);
+      text-shadow: var(--glow);
+      text-align: center;
+      animation: flicker 3s infinite;
+    }
+
+    .overlay-sub {
+      font-size: 0.72rem;
+      color: var(--verde-mid);
+      letter-spacing: 0.2em;
+      text-align: center;
+      max-width: 340px;
+      line-height: 1.8;
+    }
+
+    .overlay-btn {
+      margin-top: 10px;
+      background-color: transparent;
+      border: 1px solid var(--verde);
+      color: var(--verde);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 10px 28px;
+      cursor: pointer;
+      text-shadow: var(--glow-soft);
+      box-shadow: var(--glow-soft);
+      transition: background-color 0.15s;
+      animation: blink-border 1.5s step-end infinite;
+    }
+
+    .overlay-btn:hover {
+      background-color: var(--verde-dark);
+    }
+
+    .overlay-score {
+      font-family: 'VT323', monospace;
+      font-size: 1.5rem;
+      color: var(--verde-dim);
+      letter-spacing: 0.15em;
+    }
+
+    /* =============================================
+       LOG DE TERMINAL (mensajes del sistema)
+    ============================================= */
+    .log {
+      margin-top: 12px;
+      border-top: 1px solid var(--verde-dark);
+      padding-top: 10px;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--verde-dim);
+      min-height: 52px;
+      line-height: 1.8;
+    }
+
+    .log .log-line { display: block; }
+    .log .log-line::before { content: '> '; color: var(--verde-mid); }
+
+    /* =============================================
+       CONTROLES MÓVIL
+    ============================================= */
+    .d-pad {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 16px;
+    }
+
+    .d-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .d-btn {
+      width: 52px;
+      height: 52px;
+      background-color: var(--verde-dark);
+      border: 1px solid var(--verde-dim);
+      color: var(--verde);
+      font-size: 1.2rem;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      transition: background-color 0.1s;
+    }
+
+    .d-btn:active { background-color: var(--verde-mid); color: #000; }
+
+    @media (max-width: 600px) {
+      .d-pad { display: flex; }
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    .footer-term {
+      border: 1px solid var(--verde-dark);
+      border-top: none;
+      padding: 6px 14px;
+      font-size: 0.6rem;
+      color: var(--verde-dark);
+      letter-spacing: 0.15em;
+      display: flex;
+      justify-content: space-between;
+      background-color: #010801;
+    }
+
+    /* =============================================
+       ANIMACIONES
+    ============================================= */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    @keyframes blink-border {
+      0%, 100% { border-color: var(--verde); }
+      50%       { border-color: var(--verde-dark); }
+    }
+
+    @keyframes flicker {
+      0%,  19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 24%, 55%                             { opacity: 0.6; }
+    }
+
+    @keyframes glitch {
+      0%   { transform: translate(0); }
+      20%  { transform: translate(-2px, 1px); }
+      40%  { transform: translate(2px, -1px); }
+      60%  { transform: translate(-1px, 2px); }
+      80%  { transform: translate(1px, -2px); }
+      100% { transform: translate(0); }
+    }
+
+    .glitch { animation: glitch 0.15s linear; }
+
+  </style>
+</head>
+<body>
+
+<div class="terminal">
+
+  <!-- BARRA SUPERIOR DE SISTEMA -->
+  <div class="sys-bar">
+    <span>ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL</span>
+    <span>UNIT: <span class="hud-val">MIL-TTY-004</span></span>
+    <span>PWR: <span class="hud-val blink">■■■□□</span></span>
+  </div>
+
+  <!-- MONITOR PRINCIPAL -->
+  <div class="monitor" id="monitor">
+
+    <!-- CABECERA DEL JUEGO -->
+    <div class="game-header">
+      <div class="game-title">// SNAKE PROTOCOL //</div>
+      <div class="game-subtitle">
+        CLASSIFIED · UNIT 77-BRAVO · WASTELAND TACTICAL SYSTEM
+      </div>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud">
+      <span>SCORE: <span class="hud-val" id="score">0000</span></span>
+      <div class="rad-bar-wrap">
+        <span>RAD</span>
+        <div class="rad-bar"><div class="rad-relleno" id="rad-relleno"></div></div>
+        <span>LVL <span class="hud-val" id="nivel">1</span></span>
+      </div>
+      <span>HI: <span class="hud-val" id="hi-score">0000</span></span>
+    </div>
+
+    <!-- CANVAS -->
+    <div style="position:relative;">
+      <canvas id="canvas"></canvas>
+
+      <!-- OVERLAY DE INICIO -->
+      <div class="overlay" id="overlay-inicio">
+        <div class="overlay-titulo">// SNAKE.EXE //</div>
+        <div class="overlay-sub">
+          SISTEMA OPERATIVO: ROBCO OS v1.4.2<br />
+          UNIDAD: TANQUE ABANDONADO — SECTOR 7<br />
+          ACCESO: <span class="hud-val">AUTORIZADO</span>
+        </div>
+        <div class="overlay-score" id="death-score"></div>
+        <button class="overlay-btn" onclick="iniciarJuego()">[ INICIAR PROTOCOLO ]</button>
+        <div class="overlay-sub" style="font-size:0.6rem; margin-top:4px;">
+          ← → ↑ ↓ · WASD · O TOCA EN PANTALLA
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LOG DEL SISTEMA -->
+    <div class="log" id="log">
+      <span class="log-line">ROBCO INDUSTRIES TERMINAL — ACCESO CONCEDIDO</span>
+      <span class="log-line">CARGANDO SNAKE PROTOCOL... OK</span>
+    </div>
+
+    <!-- D-PAD MÓVIL -->
+    <div class="d-pad">
+      <div class="d-row">
+        <button class="d-btn" onclick="cambiarDir(0,-1)">▲</button>
+      </div>
+      <div class="d-row">
+        <button class="d-btn" onclick="cambiarDir(-1,0)">◄</button>
+        <button class="d-btn" onclick="cambiarDir(0,1)">▼</button>
+        <button class="d-btn" onclick="cambiarDir(1,0)">►</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BARRA INFERIOR -->
+  <div class="footer-term">
+    <span>VONSAI GAMES · THE KERNELGARDEN TEAM · CUE AVH 🇨🇴</span>
+    <span>TERMINAL ID: <span id="term-id">TK-001</span></span>
+  </div>
+
+</div>
+
+
+<script>
+
+  // ============================================================
+  //  CONFIGURACIÓN DEL JUEGO
+  // ============================================================
+  const COLS       = 28;   // columnas del grid
+  const FILAS      = 20;   // filas del grid
+  const TAM        = 20;   // tamaño de cada celda en px
+
+  const canvas = document.getElementById("canvas");
+  const ctx    = canvas.getContext("2d");
+
+  canvas.width  = COLS * TAM;
+  canvas.height = FILAS * TAM;
+
+  // Colores estilo terminal fósforo
+  const COLOR_FONDO    = "#030f01";
+  const COLOR_GRID     = "#0a1f07";
+  const COLOR_SERPIENTE = "#39ff14";
+  const COLOR_CABEZA   = "#ffffff";
+  const COLOR_COMIDA   = "#39ff14";
+  const COLOR_COMIDA2  = "#ffe600"; // comida especial (más puntos)
+
+
+  // ============================================================
+  //  VARIABLES DE ESTADO
+  // ============================================================
+  let serpiente     = [];      // array de {x, y} — cada segmento
+  let dir           = {x:1, y:0}; // dirección actual
+  let dirSiguiente  = {x:1, y:0}; // dirección del próximo frame
+  let comida        = {};
+  let comidaEspecial = null;   // aparece a veces
+  let timerEspecial  = 0;      // cuántos frames dura la comida especial
+
+  let puntos        = 0;
+  let hiScore       = 0;
+  let nivel         = 1;
+  let corriendo     = false;
+  let idLoop        = null;
+  let frameCount    = 0;
+
+  // Velocidad en ms: menos ms = más rápido
+  // Usamos nivel para calcularla
+  let velocidad     = 150;
+
+  // Mensajes aleatorios del log
+  const mensajesLog = [
+    "SEÑAL DE RADIO DETECTADA... INTERFERENCIA",
+    "ADVERTENCIA: NIVELES DE RADIACIÓN ELEVADOS",
+    "OBJETIVO ADQUIRIDO — PROCESANDO",
+    "ERROR 404: HUMANIDAD NO ENCONTRADA",
+    "PROTOCOLO DE SIGILO ACTIVADO",
+    "BATERÍA AL 12% — SISTEMA EN EMERGENCIA",
+    "BÓVEDA 101 — ACCESO DENEGADO",
+    "MOVIMIENTO DETECTADO EN SECTOR BRAVO",
+    "TRANSMISIÓN RECIBIDA: ...-- --- ...",
+    "ARCHIVO CLASIFICADO — NIVEL 5 REQUERIDO",
+    "ADVERTENCIA: SUPER MUTANTES EN PERIMETRO",
+    "SISTEMA GEIGER: 340 RAD/H — USAR PROTECCIÓN",
+    "OBJETIVO ELIMINADO. BAJAS: NINGUNA",
+    "PIPBOY 3000 SINCRONIZADO",
+    "KARMA NEUTRAL DETECTADO",
+  ];
+
+
+  // ============================================================
+  //  INICIAR EL JUEGO
+  // ============================================================
+  function iniciarJuego() {
+
+    // Ocultar overlay
+    document.getElementById("overlay-inicio").classList.add("escondido");
+    document.getElementById("death-score").textContent = "";
+
+    // Reiniciar variables
+    puntos   = 0;
+    nivel    = 1;
+    velocidad = 150;
+    frameCount = 0;
+    comidaEspecial = null;
+    timerEspecial  = 0;
+
+    // Crear serpiente con 3 segmentos en el centro
+    serpiente = [
+      { x: 14, y: 10 },
+      { x: 13, y: 10 },
+      { x: 12, y: 10 }
+    ];
+
+    dir           = { x: 1, y: 0 };
+    dirSiguiente  = { x: 1, y: 0 };
+
+    // Colocar la primera comida
+    colocarComida();
+
+    corriendo = true;
+
+    // Cancelar loop anterior si existía
+    if (idLoop !== null) clearTimeout(idLoop);
+
+    actualizarHUD();
+    logMensaje("PROTOCOLO INICIADO — BUENA SUERTE, SOLDIER");
+    gameLoop();
+  }
+
+
+  // ============================================================
+  //  LOOP PRINCIPAL
+  // ============================================================
+  function gameLoop() {
+
+    if (!corriendo) return;
+
+    frameCount++;
+
+    // Aplicar la dirección pendiente
+    dir = dirSiguiente;
+
+    // Mover la serpiente
+    const nuevaCabeza = {
+      x: serpiente[0].x + dir.x,
+      y: serpiente[0].y + dir.y
+    };
+
+    // Verificar colisión con los bordes (wrap-around estilo arcade)
+    // Usando el operador % (módulo) para que la serpiente aparezca al otro lado
+    nuevaCabeza.x = (nuevaCabeza.x + COLS) % COLS;
+    nuevaCabeza.y = (nuevaCabeza.y + FILAS) % FILAS;
+
+    // Verificar colisión consigo misma
+    // Usamos un for con && para verificar cada segmento
+    let colision = false;
+
+    for (let i = 0; i < serpiente.length; i++) {
+      if (nuevaCabeza.x === serpiente[i].x && nuevaCabeza.y === serpiente[i].y) {
+        colision = true;
+        break;
+      }
+    }
+
+    if (colision) {
+      gameOver();
+      return;
+    }
+
+    // Agregar nueva cabeza al principio
+    serpiente.unshift(nuevaCabeza);
+
+    // Verificar si comió la comida normal
+    let comio = false;
+
+    if (nuevaCabeza.x === comida.x && nuevaCabeza.y === comida.y) {
+      puntos += 10 * nivel;     // más puntos en niveles altos
+      comio = true;
+      colocarComida();
+      logMensaje(mensajesLog[Math.floor(Math.random() * mensajesLog.length)]);
+
+      // Subir de nivel cada 5 comidas (usando %)
+      if (puntos % (50 * nivel) === 0) {
+        nivel++;
+        velocidad = Math.max(60, velocidad - 12); // más rápido, mínimo 60ms
+        logMensaje("ALERTA: NIVEL " + nivel + " — VELOCIDAD INCREMENTADA");
+      }
+
+      actualizarHUD();
+    }
+
+    // Verificar si comió la comida especial
+    if (comidaEspecial !== null &&
+        nuevaCabeza.x === comidaEspecial.x &&
+        nuevaCabeza.y === comidaEspecial.y) {
+
+      puntos += 50 * nivel;
+      comio = true;
+      comidaEspecial = null;
+      timerEspecial  = 0;
+      logMensaje("¡ITEM ESPECIAL CAPTURADO! +" + (50 * nivel) + " PTS");
+      actualizarHUD();
+    }
+
+    // Si no comió, quitar la cola (el snake se mueve)
+    if (!comio) {
+      serpiente.pop();
+    }
+
+    // Timer de comida especial
+    if (comidaEspecial !== null) {
+      timerEspecial--;
+      if (timerEspecial <= 0) {
+        comidaEspecial = null;
+      }
+    }
+
+    // Aparece comida especial de vez en cuando (cada ~100 frames)
+    // Usamos ! (NOT) para verificar que no haya una ya activa
+    if (!comidaEspecial && frameCount % 100 === 0) {
+      colocarComidaEspecial();
+    }
+
+    // Dibujar todo
+    dibujar();
+
+    // Programar el siguiente frame según la velocidad
+    idLoop = setTimeout(gameLoop, velocidad);
+  }
+
+
+  // ============================================================
+  //  COLOCAR COMIDA EN POSICIÓN ALEATORIA
+  // ============================================================
+  function colocarComida() {
+
+    let libre = false;
+    let intento = {};
+
+    // Buscar una celda libre (que no esté ocupada por la serpiente)
+    while (!libre) {
+      intento = {
+        x: Math.floor(Math.random() * COLS),
+        y: Math.floor(Math.random() * FILAS)
+      };
+
+      libre = true;
+
+      for (let i = 0; i < serpiente.length; i++) {
+        if (serpiente[i].x === intento.x && serpiente[i].y === intento.y) {
+          libre = false;
+          break;
+        }
+      }
+    }
+
+    comida = intento;
+  }
+
+  function colocarComidaEspecial() {
+
+    comidaEspecial = {
+      x: Math.floor(Math.random() * COLS),
+      y: Math.floor(Math.random() * FILAS)
+    };
+
+    timerEspecial = 60; // dura 60 frames
+    logMensaje("ITEM ESPECIAL DETECTADO — ACTÚA RÁPIDO");
+  }
+
+
+  // ============================================================
+  //  DIBUJAR EL JUEGO
+  // ============================================================
+  function dibujar() {
+
+    // Fondo
+    ctx.fillStyle = COLOR_FONDO;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Grid sutil
+    ctx.strokeStyle = COLOR_GRID;
+    ctx.lineWidth   = 0.5;
+
+    for (let c = 0; c < COLS; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * TAM, 0);
+      ctx.lineTo(c * TAM, canvas.height);
+      ctx.stroke();
+    }
+
+    for (let f = 0; f < FILAS; f++) {
+      ctx.beginPath();
+      ctx.moveTo(0, f * TAM);
+      ctx.lineTo(canvas.width, f * TAM);
+      ctx.stroke();
+    }
+
+    // Comida normal — parpadea
+    const parpadea = Math.floor(Date.now() / 300) % 2 === 0;
+
+    if (parpadea) {
+      ctx.fillStyle = COLOR_COMIDA;
+      ctx.shadowColor = COLOR_COMIDA;
+      ctx.shadowBlur  = 10;
+      ctx.fillRect(comida.x * TAM + 3, comida.y * TAM + 3, TAM - 6, TAM - 6);
+
+      // Símbolo de radiación
+      ctx.fillStyle   = "#000";
+      ctx.shadowBlur  = 0;
+      ctx.font        = "11px Share Tech Mono";
+      ctx.textAlign   = "center";
+      ctx.fillText("☢", comida.x * TAM + TAM / 2, comida.y * TAM + TAM / 2 + 4);
+    }
+
+    // Comida especial (destaca más)
+    if (comidaEspecial !== null) {
+      ctx.fillStyle   = COLOR_COMIDA2;
+      ctx.shadowColor = COLOR_COMIDA2;
+      ctx.shadowBlur  = 14;
+      ctx.fillRect(comidaEspecial.x * TAM + 2, comidaEspecial.y * TAM + 2, TAM - 4, TAM - 4);
+      ctx.fillStyle   = "#000";
+      ctx.shadowBlur  = 0;
+      ctx.font        = "11px Share Tech Mono";
+      ctx.textAlign   = "center";
+      ctx.fillText("★", comidaEspecial.x * TAM + TAM / 2, comidaEspecial.y * TAM + TAM / 2 + 4);
+    }
+
+    ctx.shadowBlur = 0;
+
+    // Serpiente
+    for (let i = 0; i < serpiente.length; i++) {
+
+      const seg = serpiente[i];
+
+      // La cabeza es más brillante
+      if (i === 0) {
+        ctx.fillStyle   = COLOR_CABEZA;
+        ctx.shadowColor = COLOR_SERPIENTE;
+        ctx.shadowBlur  = 12;
+      } else {
+        // El resto se va oscureciendo hacia la cola
+        // Usamos aritmética para calcular la opacidad según la posición
+        const brillo = Math.max(0.2, 1 - (i / serpiente.length) * 0.7);
+        ctx.fillStyle   = COLOR_SERPIENTE;
+        ctx.globalAlpha = brillo;
+        ctx.shadowColor = COLOR_SERPIENTE;
+        ctx.shadowBlur  = 4;
+      }
+
+      ctx.fillRect(seg.x * TAM + 1, seg.y * TAM + 1, TAM - 2, TAM - 2);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur  = 0;
+
+      // Puntitos en los segmentos (efecto de escama/placa)
+      if (i !== 0 && i % 2 === 0) {
+        ctx.fillStyle   = "rgba(0,0,0,0.4)";
+        ctx.fillRect(seg.x * TAM + 7, seg.y * TAM + 7, 6, 6);
+      }
+    }
+
+    // Ojos de la cabeza
+    if (serpiente.length > 0) {
+      const cab = serpiente[0];
+      ctx.fillStyle = "#000";
+      ctx.shadowBlur = 0;
+
+      // Posición de los ojos según la dirección
+      if (dir.x === 1) {       // derecha
+        ctx.fillRect(cab.x * TAM + 13, cab.y * TAM + 4,  3, 3);
+        ctx.fillRect(cab.x * TAM + 13, cab.y * TAM + 13, 3, 3);
+      } else if (dir.x === -1) { // izquierda
+        ctx.fillRect(cab.x * TAM + 4,  cab.y * TAM + 4,  3, 3);
+        ctx.fillRect(cab.x * TAM + 4,  cab.y * TAM + 13, 3, 3);
+      } else if (dir.y === -1) { // arriba
+        ctx.fillRect(cab.x * TAM + 4,  cab.y * TAM + 4,  3, 3);
+        ctx.fillRect(cab.x * TAM + 13, cab.y * TAM + 4,  3, 3);
+      } else {                  // abajo
+        ctx.fillRect(cab.x * TAM + 4,  cab.y * TAM + 13, 3, 3);
+        ctx.fillRect(cab.x * TAM + 13, cab.y * TAM + 13, 3, 3);
+      }
+    }
+
+    ctx.textAlign = "left";
+  }
+
+
+  // ============================================================
+  //  GAME OVER
+  // ============================================================
+  function gameOver() {
+
+    corriendo = false;
+    clearTimeout(idLoop);
+
+    // Actualizar hi-score
+    if (puntos > hiScore) {
+      hiScore = puntos;
+    }
+
+    // Animación glitch en el monitor
+    const monitor = document.getElementById("monitor");
+    monitor.classList.add("glitch");
+    setTimeout(function () { monitor.classList.remove("glitch"); }, 160);
+
+    // Dibujar pantalla de muerte en el canvas
+    ctx.fillStyle = "rgba(3, 15, 1, 0.85)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font      = "bold 1.2rem VT323, monospace";
+    ctx.fillStyle = "#39ff14";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "#39ff14";
+    ctx.shadowBlur  = 10;
+    ctx.fillText("// SISTEMA COMPROMETIDO //", canvas.width / 2, canvas.height / 2 - 20);
+
+    ctx.font      = "0.85rem Share Tech Mono, monospace";
+    ctx.shadowBlur = 4;
+    ctx.fillText("LONGITUD: " + serpiente.length + " SEG", canvas.width / 2, canvas.height / 2 + 10);
+
+    ctx.shadowBlur = 0;
+    ctx.textAlign  = "left";
+
+    // Mostrar overlay con el score
+    document.getElementById("death-score").textContent =
+      "PUNTUACIÓN FINAL: " + String(puntos).padStart(4, "0");
+
+    document.getElementById("overlay-inicio").classList.remove("escondido");
+
+    logMensaje("UNIDAD ELIMINADA. PUNTUACIÓN: " + puntos + " | NIVEL: " + nivel);
+    actualizarHUD();
+  }
+
+
+  // ============================================================
+  //  ACTUALIZAR HUD
+  // ============================================================
+  function actualizarHUD() {
+
+    document.getElementById("score").textContent    = String(puntos).padStart(4, "0");
+    document.getElementById("hi-score").textContent = String(hiScore).padStart(4, "0");
+    document.getElementById("nivel").textContent    = nivel;
+
+    // Barra de radiación sube con el nivel (máximo nivel 10)
+    const porcentaje = Math.min(100, (nivel - 1) * 11);
+    document.getElementById("rad-relleno").style.width = porcentaje + "%";
+  }
+
+
+  // ============================================================
+  //  LOG DEL SISTEMA
+  // ============================================================
+  function logMensaje(texto) {
+
+    const logDiv = document.getElementById("log");
+
+    // Mantener solo las últimas 2 líneas
+    const lineas = logDiv.querySelectorAll(".log-line");
+
+    if (lineas.length >= 2) {
+      logDiv.removeChild(lineas[0]);
+    }
+
+    const span = document.createElement("span");
+    span.className   = "log-line";
+    span.textContent = texto;
+    logDiv.appendChild(span);
+  }
+
+
+  // ============================================================
+  //  CAMBIAR DIRECCIÓN
+  //  No permitir ir en dirección opuesta (usando && y !)
+  // ============================================================
+  function cambiarDir(dx, dy) {
+
+    // No se puede ir en dirección contraria a la actual
+    // Ejemplo: si vas a la derecha (x=1), no puedes ir a la izquierda (x=-1)
+    if (dx !== 0 && dx === -dir.x) return;
+    if (dy !== 0 && dy === -dir.y) return;
+
+    dirSiguiente = { x: dx, y: dy };
+  }
+
+
+  // ============================================================
+  //  TECLADO
+  // ============================================================
+  document.addEventListener("keydown", function (e) {
+
+    if (e.key === "ArrowUp"    || e.key === "w" || e.key === "W") {
+      e.preventDefault();
+      cambiarDir(0, -1);
+    } else if (e.key === "ArrowDown"  || e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      cambiarDir(0, 1);
+    } else if (e.key === "ArrowLeft"  || e.key === "a" || e.key === "A") {
+      e.preventDefault();
+      cambiarDir(-1, 0);
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+      e.preventDefault();
+      cambiarDir(1, 0);
+    }
+  });
+
+
+  // ============================================================
+  //  SWIPE EN MÓVIL
+  // ============================================================
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  canvas.addEventListener("touchstart", function (e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    e.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener("touchend", function (e) {
+
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+
+    // Determinar la dirección del swipe con if / else if
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // Swipe horizontal
+      if (dx > 20) {
+        cambiarDir(1, 0);   // derecha
+      } else if (dx < -20) {
+        cambiarDir(-1, 0);  // izquierda
+      }
+    } else {
+      // Swipe vertical
+      if (dy > 20) {
+        cambiarDir(0, 1);   // abajo
+      } else if (dy < -20) {
+        cambiarDir(0, -1);  // arriba
+      }
+    }
+
+    e.preventDefault();
+  }, { passive: false });
+
+
+  // ============================================================
+  //  PANTALLA INICIAL
+  // ============================================================
+
+  // ID de terminal aleatorio
+  const letras = ["TK", "MK", "BV", "RB", "NV"];
+  const termID = letras[Math.floor(Math.random() * letras.length)] + "-" +
+                 String(Math.floor(Math.random() * 999)).padStart(3, "0");
+  document.getElementById("term-id").textContent = termID;
+
+  // Dibujar pantalla inicial en el canvas
+  ctx.fillStyle = COLOR_FONDO;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Estrellas/ruido de fondo
+  ctx.fillStyle = COLOR_GRID;
+  for (let i = 0; i < 200; i++) {
+    ctx.fillRect(
+      Math.floor(Math.random() * COLS) * TAM + TAM / 2,
+      Math.floor(Math.random() * FILAS) * TAM + TAM / 2,
+      1, 1
+    );
+  }
+
+</script>
+</body>
+</html>

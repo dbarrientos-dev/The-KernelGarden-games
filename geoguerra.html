@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banderas del Mundo 🌍 — Vonsai Games</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+
+    /* ========================================
+       ESTILOS GENERALES
+    ======================================== */
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0a0f1e;
+      color: #e0eaf8;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .contenedor {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+
+    /* ========================================
+       NAVBAR
+    ======================================== */
+
+    nav {
+      background-color: #0d1423;
+      border-bottom: 2px solid #00cfff;
+      padding: 15px 0;
+    }
+
+    .nav-contenido {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: #00ff88;
+    }
+
+    .nav-volver {
+      color: #7a90b0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-volver:hover {
+      color: #00cfff;
+    }
+
+
+    /* ========================================
+       CABECERA DEL JUEGO
+    ======================================== */
+
+    .juego-header {
+      text-align: center;
+      padding: 50px 20px 30px;
+    }
+
+    .juego-header h1 {
+      font-size: 1.6rem;
+      color: #00cfff;
+      margin-bottom: 8px;
+    }
+
+    .juego-header p {
+      color: #7a90b0;
+      font-size: 0.9rem;
+    }
+
+
+    /* ========================================
+       BARRA DE PROGRESO Y PUNTOS
+    ======================================== */
+
+    .info-juego {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .puntos {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: #00ff88;
+    }
+
+    .progreso-texto {
+      color: #7a90b0;
+      font-size: 0.85rem;
+    }
+
+    .barra-fondo {
+      height: 6px;
+      background-color: #1e2a40;
+      border-radius: 999px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .barra-relleno {
+      height: 6px;
+      background-color: #00cfff;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.4s;
+    }
+
+
+    /* ========================================
+       TARJETA DE PREGUNTA
+    ======================================== */
+
+    .tarjeta-pregunta {
+      background-color: #111827;
+      border: 1px solid #1e2a40;
+      border-radius: 12px;
+      padding: 40px 30px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .bandera-emoji {
+      font-size: 6rem;
+      display: block;
+      margin-bottom: 20px;
+      line-height: 1;
+    }
+
+    .pregunta-texto {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: #7a90b0;
+      margin: 0;
+    }
+
+
+    /* ========================================
+       BOTONES DE OPCIONES
+    ======================================== */
+
+    .opciones {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .btn-opcion {
+      background-color: #111827;
+      border: 2px solid #1e2a40;
+      border-radius: 10px;
+      color: #e0eaf8;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 16px 20px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .btn-opcion:hover {
+      border-color: #00cfff;
+      background-color: #00cfff15;
+    }
+
+    /* Estado: respuesta correcta */
+    .btn-opcion.correcto {
+      border-color: #00ff88;
+      background-color: #00ff8820;
+      color: #00ff88;
+    }
+
+    /* Estado: respuesta incorrecta */
+    .btn-opcion.incorrecto {
+      border-color: #ff4466;
+      background-color: #ff446620;
+      color: #ff4466;
+    }
+
+    /* Desactivar botones después de responder */
+    .btn-opcion:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+
+    /* ========================================
+       MENSAJE DE RESULTADO
+    ======================================== */
+
+    .mensaje {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 30px;
+      margin-bottom: 20px;
+    }
+
+    .mensaje.correcto { color: #00ff88; }
+    .mensaje.incorrecto { color: #ff4466; }
+
+
+    /* ========================================
+       BOTÓN SIGUIENTE
+    ======================================== */
+
+    .btn-siguiente {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 10px;
+      background-color: #00cfff;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 40px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-siguiente:hover {
+      background-color: #33d6ff;
+    }
+
+    /* Esconder el botón hasta que el usuario responda */
+    .escondido {
+      display: none !important;
+    }
+
+
+    /* ========================================
+       PANTALLA DE RESULTADO FINAL
+    ======================================== */
+
+    .pantalla-final {
+      background-color: #111827;
+      border: 1px solid #1e2a40;
+      border-radius: 12px;
+      padding: 50px 30px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .pantalla-final .trofeo {
+      font-size: 5rem;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .pantalla-final h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #e0eaf8;
+    }
+
+    .pantalla-final .puntaje-final {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #00ff88;
+      display: block;
+      margin: 20px 0 10px;
+    }
+
+    .pantalla-final .de-total {
+      color: #7a90b0;
+      font-size: 0.9rem;
+      margin-bottom: 30px;
+    }
+
+    .pantalla-final .btn-reiniciar {
+      background-color: #00ff88;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: background-color 0.2s;
+    }
+
+    .pantalla-final .btn-reiniciar:hover {
+      background-color: #00ffaa;
+    }
+
+    .pantalla-final .btn-inicio {
+      background-color: transparent;
+      color: #00cfff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      border-radius: 10px;
+      border: 2px solid #00cfff;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .pantalla-final .btn-inicio:hover {
+      background-color: #00cfff20;
+    }
+
+    /* ========================================
+       FOOTER
+    ======================================== */
+
+    footer {
+      background-color: #0d1423;
+      border-top: 1px solid #1e2a40;
+      padding: 20px;
+      text-align: center;
+    }
+
+    footer p {
+      color: #7a90b0;
+      font-size: 0.78rem;
+      margin: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-contenido">
+      <div class="logo">🎮 VonsaiGames</div>
+      <a href="index.html" class="nav-volver">← Volver al inicio</a>
+    </div>
+  </nav>
+
+
+  <!-- CABECERA -->
+  <div class="juego-header">
+    <h1>🌍 Banderas del Mundo</h1>
+    <p>¿De qué país es cada bandera? 10 preguntas, 3 opciones cada una.</p>
+  </div>
+
+
+  <!-- ÁREA PRINCIPAL DEL JUEGO -->
+  <div class="contenedor">
+
+    <!-- Puntos y progreso -->
+    <div class="info-juego">
+      <span class="puntos" id="puntos">⭐ Puntos: 0</span>
+      <span class="progreso-texto" id="progreso">Pregunta 1 de 10</span>
+    </div>
+
+    <div class="barra-fondo">
+      <div class="barra-relleno" id="barra"></div>
+    </div>
+
+    <!-- Tarjeta de pregunta (se oculta al terminar) -->
+    <div id="zona-juego">
+
+      <div class="tarjeta-pregunta">
+        <span class="bandera-emoji" id="bandera">🏳️</span>
+        <p class="pregunta-texto">¿De qué país es esta bandera?</p>
+      </div>
+
+      <div class="opciones" id="opciones">
+        <!-- Los botones se generan con JavaScript -->
+      </div>
+
+      <div class="mensaje escondido" id="mensaje"></div>
+
+      <button class="btn-siguiente escondido" id="btn-siguiente" onclick="siguientePregunta()">
+        Siguiente →
+      </button>
+
+    </div>
+
+    <!-- Pantalla final (oculta al inicio) -->
+    <div class="pantalla-final escondido" id="pantalla-final">
+      <span class="trofeo" id="trofeo">🏆</span>
+      <h2>¡Juego terminado!</h2>
+      <span class="puntaje-final" id="puntaje-final">0</span>
+      <p class="de-total">puntos de 100 posibles</p>
+      <p id="mensaje-final" style="color:#7a90b0; margin-bottom: 25px;"></p>
+      <button class="btn-reiniciar" onclick="reiniciarJuego()">Jugar de nuevo</button>
+      <a href="index.html"><button class="btn-inicio">Inicio</button></a>
+    </div>
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Vonsai Games · The KernelGarden Team · CUE AVH, Armenia 🇨🇴</p>
+  </footer>
+
+
+  <!-- ========================================
+       JAVASCRIPT DEL JUEGO
+  ======================================== -->
+  <script>
+
+    // ----------------------------------------
+    // DATOS DEL JUEGO
+    // Cada objeto tiene: bandera (emoji), correcta (en minúsculas), opciones (array)
+    // ----------------------------------------
+    const preguntas = [
+      { bandera: "🇦🇷", correcta: "argentina",   opciones: ["Chile",    "Argentina", "Uruguay"]  },
+      { bandera: "🇲🇽", correcta: "mexico",       opciones: ["España",   "Colombia",  "Mexico"]   },
+      { bandera: "🇯🇵", correcta: "japon",        opciones: ["China",    "Japon",     "Corea"]    },
+      { bandera: "🇧🇷", correcta: "brasil",       opciones: ["Brasil",   "Portugal",  "Bolivia"]  },
+      { bandera: "🇫🇷", correcta: "francia",      opciones: ["Francia",  "Bélgica",   "Holanda"]  },
+      { bandera: "🇩🇪", correcta: "alemania",     opciones: ["Austria",  "Alemania",  "Suiza"]    },
+      { bandera: "🇨🇴", correcta: "colombia",     opciones: ["Ecuador",  "Venezuela", "Colombia"] },
+      { bandera: "🇮🇹", correcta: "italia",       opciones: ["Italia",   "España",    "Grecia"]   },
+      { bandera: "🇺🇸", correcta: "estados unidos", opciones: ["Australia", "Estados Unidos", "Canada"] },
+      { bandera: "🇦🇺", correcta: "australia",   opciones: ["Australia","Nueva Zelanda","Canadá"] }
+    ];
+
+
+    // ----------------------------------------
+    // VARIABLES DE ESTADO
+    // ----------------------------------------
+    let puntos          = 0;
+    let indicePregunta  = 0;   // cuál pregunta estamos mostrando (0 a 9)
+    let respondio       = false; // para evitar doble clic
+
+
+    // ----------------------------------------
+    // FUNCIÓN: mostrar la pregunta actual
+    // ----------------------------------------
+    function mostrarPregunta() {
+
+      // Si ya terminamos todas las preguntas, mostrar pantalla final
+      if (indicePregunta >= preguntas.length) {
+        mostrarPantallaFinal();
+        return;
+      }
+
+      respondio = false;
+
+      // Obtener datos de la pregunta actual
+      const pregunta = preguntas[indicePregunta];
+
+      // Mostrar la bandera
+      document.getElementById("bandera").textContent = pregunta.bandera;
+
+      // Actualizar texto de progreso
+      document.getElementById("progreso").textContent =
+        "Pregunta " + (indicePregunta + 1) + " de " + preguntas.length;
+
+      // Actualizar barra de progreso
+      const porcentaje = (indicePregunta / preguntas.length) * 100;
+      document.getElementById("barra").style.width = porcentaje + "%";
+
+      // Limpiar mensaje
+      const mensaje = document.getElementById("mensaje");
+      mensaje.textContent = "";
+      mensaje.className = "mensaje escondido";
+
+      // Esconder botón siguiente
+      document.getElementById("btn-siguiente").classList.add("escondido");
+
+      // Crear los botones de opciones
+      const contenedorOpciones = document.getElementById("opciones");
+      contenedorOpciones.innerHTML = ""; // limpiar opciones anteriores
+
+      for (let i = 0; i < pregunta.opciones.length; i++) {
+
+        const boton = document.createElement("button");
+        boton.textContent = pregunta.opciones[i];
+        boton.className = "btn-opcion";
+
+        // Al hacer clic, verificar respuesta
+        // Usamos una función separada para pasar el valor correcto
+        boton.onclick = function () {
+          verificarRespuesta(pregunta.opciones[i], pregunta.correcta);
+        };
+
+        contenedorOpciones.appendChild(boton);
+      }
+    }
+
+
+    // ----------------------------------------
+    // FUNCIÓN: verificar si la respuesta es correcta
+    // (basada en el código original de Daniel)
+    // ----------------------------------------
+    function verificarRespuesta(eleccionUsuario, respuestaCorrecta) {
+
+      // Evitar que hagan clic varias veces
+      if (respondio) return;
+      respondio = true;
+
+      // Desactivar todos los botones
+      const botones = document.querySelectorAll(".btn-opcion");
+      botones.forEach(function (boton) {
+        boton.disabled = true;
+      });
+
+      // Comparar la elección del usuario con la respuesta correcta
+      if (eleccionUsuario.toLowerCase() === respuestaCorrecta) {
+
+        // RESPUESTA CORRECTA
+        puntos += 10;
+
+        // Colorear el botón correcto en verde
+        botones.forEach(function (boton) {
+          if (boton.textContent.toLowerCase() === respuestaCorrecta) {
+            boton.classList.add("correcto");
+          }
+        });
+
+        // Mostrar mensaje de éxito
+        const mensaje = document.getElementById("mensaje");
+        mensaje.textContent = "✅ ¡Correcto! +10 puntos";
+        mensaje.className = "mensaje correcto";
+
+      } else {
+
+        // RESPUESTA INCORRECTA
+        // Colorear el botón elegido en rojo
+        botones.forEach(function (boton) {
+          if (boton.textContent.toLowerCase() === eleccionUsuario.toLowerCase()) {
+            boton.classList.add("incorrecto");
+          }
+          // Mostrar cuál era la correcta en verde
+          if (boton.textContent.toLowerCase() === respuestaCorrecta) {
+            boton.classList.add("correcto");
+          }
+        });
+
+        // Mostrar mensaje de error
+        const mensaje = document.getElementById("mensaje");
+        mensaje.textContent = "❌ Era " + respuestaCorrecta.toUpperCase();
+        mensaje.className = "mensaje incorrecto";
+      }
+
+      // Actualizar el contador de puntos en pantalla
+      document.getElementById("puntos").textContent = "⭐ Puntos: " + puntos;
+
+      // Mostrar el botón "Siguiente"
+      document.getElementById("btn-siguiente").classList.remove("escondido");
+      document.getElementById("mensaje").classList.remove("escondido");
+    }
+
+
+    // ----------------------------------------
+    // FUNCIÓN: pasar a la siguiente pregunta
+    // ----------------------------------------
+    function siguientePregunta() {
+      indicePregunta += 1;
+      mostrarPregunta();
+    }
+
+
+    // ----------------------------------------
+    // FUNCIÓN: mostrar pantalla de resultado final
+    // ----------------------------------------
+    function mostrarPantallaFinal() {
+
+      // Ocultar zona de juego
+      document.getElementById("zona-juego").classList.add("escondido");
+
+      // Mostrar pantalla final
+      const pantallaFinal = document.getElementById("pantalla-final");
+      pantallaFinal.classList.remove("escondido");
+
+      // Mostrar puntaje
+      document.getElementById("puntaje-final").textContent = puntos;
+
+      // Actualizar barra al 100%
+      document.getElementById("barra").style.width = "100%";
+
+      // Mensaje según rendimiento
+      let trofeo = "";
+      let mensaje = "";
+
+      if (puntos === 100) {
+        trofeo   = "🏆";
+        mensaje  = "¡Perfecto! ¡Conoces todas las banderas del mundo!";
+      } else if (puntos >= 70) {
+        trofeo   = "🥇";
+        mensaje  = "¡Muy bien! Tienes buenos conocimientos de geografía.";
+      } else if (puntos >= 40) {
+        trofeo   = "🥈";
+        mensaje  = "Bien, pero puedes mejorar. ¡Intenta de nuevo!";
+      } else {
+        trofeo   = "📚";
+        mensaje  = "Hay que estudiar más geografía. ¡Tú puedes!";
+      }
+
+      document.getElementById("trofeo").textContent = trofeo;
+      document.getElementById("mensaje-final").textContent = mensaje;
+    }
+
+
+    // ----------------------------------------
+    // FUNCIÓN: reiniciar el juego desde cero
+    // ----------------------------------------
+    function reiniciarJuego() {
+
+      // Reiniciar variables
+      puntos         = 0;
+      indicePregunta = 0;
+      respondio      = false;
+
+      // Mostrar zona de juego
+      document.getElementById("zona-juego").classList.remove("escondido");
+
+      // Ocultar pantalla final
+      document.getElementById("pantalla-final").classList.add("escondido");
+
+      // Reiniciar puntos en pantalla
+      document.getElementById("puntos").textContent = "⭐ Puntos: 0";
+
+      // Mostrar primera pregunta
+      mostrarPregunta();
+    }
+
+
+    // ----------------------------------------
+    // INICIO: mostrar la primera pregunta
+    // ----------------------------------------
+    mostrarPregunta();
+
+  </script>
+
+</body>
+</html>

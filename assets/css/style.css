@@ -1,0 +1,861 @@
+/* ============================================================
+   THE KERNELGARDEN GAMES — style.css
+   Paleta: Oscuro · Oro · Abalache (aguamarina helada)
+   Autor: The KernelGarden Team
+   Compatibilidad: Firefox, Chrome, Safari
+   ============================================================ */
+
+/* ── Variables de diseño ── */
+:root {
+  --bg-base:        #080B14;
+  --bg-nav:         #0C1020;
+  --bg-card:        #101525;
+  --bg-card-hover:  #141B2E;
+  --border:         rgba(212, 160, 23, 0.18);
+  --border-strong:  rgba(212, 160, 23, 0.45);
+
+  --gold:           #D4A017;
+  --gold-light:     #F0C040;
+  --gold-glow:      rgba(212, 160, 23, 0.25);
+
+  --abalache:       #A8D8EA;
+  --abalache-dim:   rgba(168, 216, 234, 0.18);
+  --abalache-glow:  rgba(168, 216, 234, 0.3);
+
+  --text:           #E8EAF0;
+  --text-muted:     #7A8499;
+  --text-soft:      #B0B8CC;
+
+  --radius:         12px;
+  --radius-sm:      7px;
+  --transition:     0.22s ease;
+  --font-display:   'Oxanium', cursive;
+  --font-body:      'Nunito', sans-serif;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* Skip to content — accesibilidad */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--gold);
+  color: #000;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  z-index: 9999;
+  transition: top var(--transition);
+}
+.skip-link:focus { top: 16px; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+a { text-decoration: none; color: inherit; }
+
+img { max-width: 100%; display: block; }
+
+/* ── Contenedor ── */
+.contenedor {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Partículas de fondo ── */
+#particulas-fondo {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* ── Separador ── */
+.separador {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(8, 11, 20, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+  transition: background var(--transition);
+}
+
+.nav-contenido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--gold);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.logo-icono {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* Links de navegación */
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: color var(--transition);
+  position: relative;
+  padding-bottom: 3px;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width var(--transition);
+}
+
+.nav-links a:hover,
+.nav-links a[aria-current="page"] {
+  color: var(--gold);
+}
+
+.nav-links a:hover::after,
+.nav-links a[aria-current="page"]::after {
+  width: 100%;
+}
+
+/* Botón menú móvil */
+.btn-menu {
+  display: none;
+  background: none;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  width: 40px; height: 40px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  transition: border-color var(--transition);
+}
+
+.btn-menu:hover { border-color: var(--gold); }
+.btn-menu:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.btn-menu span {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.btn-menu.abierto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.btn-menu.abierto span:nth-child(2) { opacity: 0; }
+.btn-menu.abierto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  padding: 90px 24px 70px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Fondo decorativo del hero */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(212,160,23,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--gold);
+  padding: 7px 20px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  /* Animación de entrada */
+  opacity: 0;
+  animation: fadeInDown 0.6s ease 0.1s forwards;
+}
+
+.hero-titulo {
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  margin-bottom: 22px;
+  opacity: 0;
+  animation: fadeInDown 0.6s ease 0.25s forwards;
+}
+
+.hero-titulo .oro { color: var(--gold); }
+.hero-titulo .abalache { color: var(--abalache); }
+
+.hero-desc {
+  color: var(--text-soft);
+  font-size: 1rem;
+  max-width: 540px;
+  margin: 0 auto 38px;
+  opacity: 0;
+  animation: fadeInDown 0.6s ease 0.4s forwards;
+}
+
+.hero-botones {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeInDown 0.6s ease 0.55s forwards;
+}
+
+/* ── Animaciones de entrada ── */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50%       { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* ── Botones ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-oro {
+  background: linear-gradient(135deg, var(--gold), #c48c10);
+  color: #0A0B0E;
+  font-weight: 800;
+  animation: pulseGold 2.5s infinite 1.5s;
+}
+
+.btn-oro:hover {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--gold-glow);
+  animation: none;
+}
+
+.btn-borde {
+  background: transparent;
+  color: var(--abalache);
+  border: 2px solid rgba(168, 216, 234, 0.5);
+}
+
+.btn-borde:hover {
+  background: var(--abalache-dim);
+  border-color: var(--abalache);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--abalache-glow);
+}
+
+
+/* ============================================================
+   ESTADÍSTICAS
+   ============================================================ */
+
+.stats {
+  position: relative;
+  z-index: 1;
+  padding: 40px 24px;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.stat:nth-child(1) { animation-delay: 0.7s; }
+.stat:nth-child(2) { animation-delay: 0.85s; }
+.stat:nth-child(3) { animation-delay: 1.0s; }
+.stat:nth-child(4) { animation-delay: 1.15s; }
+
+.stat-numero {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-texto {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+
+/* ============================================================
+   SECCIÓN GENÉRICA
+   ============================================================ */
+
+.seccion {
+  position: relative;
+  z-index: 1;
+  padding: 70px 24px;
+}
+
+.seccion-titulo {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.seccion-titulo h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin-bottom: 10px;
+}
+
+.seccion-titulo .oro    { color: var(--gold); }
+.seccion-titulo .abalache { color: var(--abalache); }
+
+.seccion-titulo p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* Etiqueta de sección (pequeña encima del h2) */
+.seccion-label {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--gold-glow);
+  border: 1px solid var(--border-strong);
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+
+/* ============================================================
+   TARJETAS DE JUEGOS
+   ============================================================ */
+
+.grid-juegos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.card-juego {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+  /* Accesibilidad: foco visible */
+  outline-offset: 4px;
+}
+
+.card-juego:focus-visible {
+  outline: 2px solid var(--gold);
+}
+
+.card-juego:hover {
+  border-color: var(--gold-light);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(212, 160, 23, 0.15);
+  background-color: var(--bg-card-hover);
+}
+
+.card-juego.variante-abalache:hover {
+  border-color: var(--abalache);
+  box-shadow: 0 12px 32px var(--abalache-glow);
+}
+
+/* Icono grande */
+.card-icono {
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-bottom: 14px;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.card-juego:hover .card-icono {
+  transform: scale(1.12) rotate(-3deg);
+}
+
+/* Tag de género */
+.card-tag {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  background: var(--gold-glow);
+  color: var(--gold-light);
+  border: 1px solid var(--border-strong);
+}
+
+.card-juego.variante-abalache .card-tag {
+  background: var(--abalache-dim);
+  color: var(--abalache);
+  border-color: rgba(168, 216, 234, 0.35);
+}
+
+.card-juego h3 {
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.card-juego p {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.card-link {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap var(--transition), color var(--transition);
+  margin-top: auto;
+}
+
+.card-juego:hover .card-link { gap: 10px; }
+.card-juego.variante-abalache .card-link { color: var(--abalache); }
+
+
+/* ============================================================
+   PRODUCTOS DEL ECOSISTEMA
+   ============================================================ */
+
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.card-producto {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.card-producto:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-3px);
+}
+
+.prod-icono {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold-glow);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+}
+
+.prod-body h3 {
+  font-size: 0.95rem;
+  color: var(--gold-light);
+  margin-bottom: 7px;
+}
+
+.prod-body p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.prod-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--abalache);
+  background: var(--abalache-dim);
+  border: 1px solid rgba(168,216,234,0.25);
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+
+/* ============================================================
+   SOBRE EL EQUIPO
+   ============================================================ */
+
+.grid-about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.card-about {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px;
+}
+
+.card-about h3 {
+  font-size: 0.9rem;
+  color: var(--gold);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.card-about p {
+  color: var(--text-muted);
+  font-size: 0.87rem;
+  line-height: 1.75;
+  margin: 0;
+}
+
+.card-about strong { color: var(--text); }
+
+
+/* ============================================================
+   CONTADOR ANIMADO (sección interactiva)
+   ============================================================ */
+
+.banner-interactivo {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(212,160,23,0.05) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 50px 24px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.banner-interactivo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212,160,23,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.banner-interactivo h2 {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  margin-bottom: 10px;
+}
+
+.banner-interactivo p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 26px;
+}
+
+/* ── Tema claro/oscuro toggle ── */
+.toggle-tema {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  user-select: none;
+}
+
+.toggle-tema input { display: none; }
+
+.toggle-track {
+  width: 48px; height: 26px;
+  background: var(--bg-base);
+  border: 2px solid var(--border-strong);
+  border-radius: 999px;
+  position: relative;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.toggle-tema input:checked + .toggle-track {
+  background: var(--gold-glow);
+  border-color: var(--gold);
+}
+
+.toggle-tema input:checked + .toggle-track::after {
+  transform: translateX(22px);
+  background: var(--gold);
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+footer {
+  background-color: var(--bg-nav);
+  border-top: 1px solid var(--border-strong);
+  padding: 50px 24px 28px;
+  margin-top: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 36px;
+}
+
+.footer-marca p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.75;
+  margin-top: 12px;
+}
+
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.footer-col ul {
+  list-style: none;
+}
+
+.footer-col li { margin-bottom: 10px; }
+
+.footer-col a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: color var(--transition);
+}
+
+.footer-col a:hover { color: var(--gold-light); }
+.footer-col a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 2px; }
+
+.footer-abajo {
+  border-top: 1px solid var(--border);
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-abajo p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+
+/* ============================================================
+   MODO CLARO (accesibilidad / preferencia del usuario)
+   ============================================================ */
+
+body.modo-claro {
+  --bg-base:        #F5F0E8;
+  --bg-nav:         #EDE8DC;
+  --bg-card:        #EAE4D4;
+  --bg-card-hover:  #E0D9C8;
+  --border:         rgba(140, 100, 10, 0.2);
+  --border-strong:  rgba(140, 100, 10, 0.45);
+  --text:           #1A1610;
+  --text-muted:     #6B5B3E;
+  --text-soft:      #4A3E28;
+  --gold:           #9A7010;
+  --gold-light:     #B08820;
+  --gold-glow:      rgba(160, 115, 20, 0.15);
+  --abalache:       #3A8FAA;
+  --abalache-dim:   rgba(58, 143, 170, 0.12);
+}
+
+
+/* ============================================================
+   SCROLL REVEAL — clase aplicada por JS
+   ============================================================ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .grid-juegos    { grid-template-columns: 1fr; }
+  .grid-productos { grid-template-columns: 1fr; }
+  .footer-grid    { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 700px) {
+  .nav-links          { display: none; flex-direction: column; gap: 18px; position: absolute;
+                        top: 100%; left: 0; right: 0; background: var(--bg-nav);
+                        border-bottom: 1px solid var(--border-strong);
+                        padding: 24px; }
+  .nav-links.abierto  { display: flex; }
+  .btn-menu           { display: flex; }
+  .grid-about         { grid-template-columns: 1fr; }
+  .footer-grid        { grid-template-columns: 1fr; gap: 28px; }
+  .hero               { padding: 60px 20px 50px; }
+  .stats-grid         { gap: 28px; }
+}
+
+@media (max-width: 480px) {
+  .hero-titulo { font-size: 1.9rem; }
+  .btn         { font-size: 0.72rem; padding: 11px 20px; }
+}
+
+/* ── Reducir movimiento (accesibilidad) ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
