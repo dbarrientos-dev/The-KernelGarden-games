@@ -378,30 +378,6 @@
        Así el DOM ya existe cuando el script se ejecuta. -->
   <script src="assets/js/main.js"></script>
 
-  <!-- BUG FIX #2: Parche inline para sincronizar aria-checked con el toggle de tema.
-       Si tu main.js ya maneja esto, puedes eliminar este bloque. -->
-  <script>
-    (function () {
-      const toggle = document.getElementById('toggle-tema');
-      if (!toggle) return;
-
-      // Restaurar preferencia guardada
-      const savedTheme = localStorage.getItem('tema');
-      if (savedTheme === 'claro') {
-        toggle.checked = true;
-        toggle.setAttribute('aria-checked', 'true');
-        document.documentElement.setAttribute('data-tema', 'claro');
-      }
-
-      toggle.addEventListener('change', function () {
-        const isClaro = this.checked;
-        // Actualizar aria-checked correctamente
-        this.setAttribute('aria-checked', isClaro ? 'true' : 'false');
-        document.documentElement.setAttribute('data-tema', isClaro ? 'claro' : 'oscuro');
-        localStorage.setItem('tema', isClaro ? 'claro' : 'oscuro');
-      });
-    })();
-  </script>
 
 </body>
 </html>
