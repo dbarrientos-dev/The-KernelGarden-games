@@ -5,7 +5,6 @@
    ============================================================ */
 
 'use strict';
-  <script>alert("Bienvenido a The KernelGarden Games")</script>
 
 /* ── Esperar a que el DOM esté listo ── */
 document.addEventListener('DOMContentLoaded', function () {
@@ -258,27 +257,28 @@ function iniciarToggleTema() {
   var toggle = document.getElementById('toggle-tema');
   if (!toggle) return;
 
-  /* Cargar preferencia guardada */
-  var guardado = localStorage.getItem('kg-tema');
-  if (guardado === 'claro') {
-    document.body.classList.add('modo-claro');
-    toggle.checked = true;
+  function aplicarTema(tema) {
+    var esClaro = tema === 'claro';
+    document.body.classList.toggle('modo-claro', esClaro);
+    toggle.checked = esClaro;
+    toggle.setAttribute('aria-checked', esClaro ? 'true' : 'false');
   }
+
+  /* Cargar preferencia guardada */
+  var guardado = localStorage.getItem('kg-tema') || localStorage.getItem('tema');
 
   /* Detectar preferencia del sistema si no hay guardado */
   if (!guardado && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.body.classList.add('modo-claro');
-    toggle.checked = true;
+    guardado = 'claro';
   }
 
+  aplicarTema(guardado === 'claro' ? 'claro' : 'oscuro');
+
   toggle.addEventListener('change', function () {
-    if (toggle.checked) {
-      document.body.classList.add('modo-claro');
-      localStorage.setItem('kg-tema', 'claro');
-    } else {
-      document.body.classList.remove('modo-claro');
-      localStorage.setItem('kg-tema', 'oscuro');
-    }
+    var tema = toggle.checked ? 'claro' : 'oscuro';
+    aplicarTema(tema);
+    localStorage.setItem('kg-tema', tema);
+    localStorage.setItem('tema', tema);
   });
 }
 
