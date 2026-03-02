@@ -8,8 +8,9 @@
   <link rel="icon" type="image/png" href="./assets/images/Golden_Sun_Icon.svg.png" />
   <link rel="apple-touch-icon" href="./assets/images/Golden_Sun_Icon.svg.png" />
   <link rel="stylesheet" href="assets/css/style.css" />
-    <script src="assets/js/main.js"></script>
-
+  <!-- BUG FIX #1: Eliminado el <script src="main.js"> del <head> que se ejecutaba
+       antes de que el DOM existiera. El script ahora solo se carga UNA vez
+       al final del <body>, que es el lugar correcto. -->
 </head>
 
 <body>
@@ -254,6 +255,9 @@
         </h2>
         <p class="reveal">Cambia el tema sin recargar la página — tu preferencia se guarda.</p>
 
+        <!-- BUG FIX #2: aria-checked ahora se actualiza dinámicamente desde JS.
+             El valor inicial sigue siendo "false" (modo oscuro por defecto),
+             pero main.js debe actualizarlo al cambiar el toggle. -->
         <label class="toggle-tema reveal" aria-label="Cambiar entre modo oscuro y claro">
           <input type="checkbox" id="toggle-tema" role="switch" aria-checked="false" />
           <span class="toggle-track" aria-hidden="true"></span>
@@ -370,7 +374,34 @@
     </div>
   </footer>
 
+  <!-- BUG FIX #1: Script cargado UNA sola vez, aquí al final del body.
+       Así el DOM ya existe cuando el script se ejecuta. -->
   <script src="assets/js/main.js"></script>
+
+  <!-- BUG FIX #2: Parche inline para sincronizar aria-checked con el toggle de tema.
+       Si tu main.js ya maneja esto, puedes eliminar este bloque. -->
+  <script>
+    (function () {
+      const toggle = document.getElementById('toggle-tema');
+      if (!toggle) return;
+
+      // Restaurar preferencia guardada
+      const savedTheme = localStorage.getItem('tema');
+      if (savedTheme === 'claro') {
+        toggle.checked = true;
+        toggle.setAttribute('aria-checked', 'true');
+        document.documentElement.setAttribute('data-tema', 'claro');
+      }
+
+      toggle.addEventListener('change', function () {
+        const isClaro = this.checked;
+        // Actualizar aria-checked correctamente
+        this.setAttribute('aria-checked', isClaro ? 'true' : 'false');
+        document.documentElement.setAttribute('data-tema', isClaro ? 'claro' : 'oscuro');
+        localStorage.setItem('tema', isClaro ? 'claro' : 'oscuro');
+      });
+    })();
+  </script>
 
 </body>
 </html>
