@@ -5,6 +5,7 @@
    ============================================================ */
 
 'use strict';
+  <script>alert("Bienvenido a The KernelGarden Games")</script>
 
 /* ── Esperar a que el DOM esté listo ── */
 document.addEventListener('DOMContentLoaded', function () {
